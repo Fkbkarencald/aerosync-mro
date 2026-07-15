@@ -64,3 +64,31 @@ Open the URL shown in the terminal (typically `http://localhost:5173`).
 - React 19
 - TypeScript
 - Vite
+
+## UI Design Preview
+
+This branch contains the **complete, navigable UI design preview** of AeroSync MRO: 44 client-side
+routes covering every documented screen (docs/16), a shared enterprise design system, and one typed,
+internally consistent mock dataset — no backend, no network calls, no persistence.
+
+> **Prototype — not for operational use or airworthiness decisions.** The disclaimer is shown
+> persistently in the application footer.
+
+Highlights:
+
+- **Application shell** — dark-slate collapsible sidebar (drawer on mobile), operator top bar with
+  notification and user-menu previews, breadcrumbs, persistent disclaimer footer.
+- **Flagship operational screens** — Fleet Availability board and the Defect Review queue.
+- **Full workflow story** — the dataset freezes an operational moment (Wed 15 Jul 2026, 13:00):
+  a closed defect→work-order→sign-off loop on `VH-OYU` (DEF-2026-0042 → WO-2026-0031 → SO-2026-0018),
+  a live AOG recovery at MQL, a release due by 17:30, and an A-Check in progress.
+- **Design notes** — see [`.ai/design/active/aerosync-mro-full-ui-preview/`](./.ai/design/active/aerosync-mro-full-ui-preview/overview.md).
+
+### Preview validation
+
+```bash
+npm run lint                                             # oxlint
+npm run build                                            # tsc -b && vite build
+npx vite build --ssr scripts/smoke.tsx --outDir dist-smoke --emptyOutDir
+node dist-smoke/smoke.js                                 # render all routes + dead-link scan
+```

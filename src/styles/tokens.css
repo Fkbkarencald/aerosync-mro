@@ -1,0 +1,141 @@
+/* ============================================================
+   AeroSync MRO — Design tokens
+   Single source of truth for colour, type, spacing, elevation,
+   density and status tones. See .ai/design/active/
+   aerosync-mro-full-ui-preview/design-system.md
+   ------------------------------------------------------------
+   Breakpoints (used in media queries, mirrored here for docs):
+     --bp-sm:  640px   phones / large phones
+     --bp-md:  768px   tablet portrait — sidebar becomes drawer below this
+     --bp-lg:  1024px  tablet landscape / small laptop
+     --bp-xl:  1280px  standard laptop
+     --bp-2xl: 1440px  large desktop
+   ============================================================ */
+
+:root {
+  color-scheme: light;
+
+  /* ---- Brand & accent -------------------------------------- */
+  --accent: #1d5fd6;
+  --accent-hover: #174db1;
+  --accent-active: #123f92;
+  --accent-soft: #e8f0fd;
+  --accent-soft-border: #c8dbf8;
+  --accent-contrast: #ffffff;
+  --focus-ring: #8fb6f5;
+
+  /* ---- Workspace (light neutral) --------------------------- */
+  --bg: #f3f5f8;
+  --surface: #ffffff;
+  --surface-sunken: #f8fafb;
+  --surface-hover: #f6f8fb;
+  --border: #e2e7ee;
+  --border-strong: #cbd4df;
+  --text: #1c2736;
+  --text-secondary: #4c5b70;
+  --text-muted: #77839a;
+  --text-faint: #9aa5b5;
+
+  /* ---- Navigation (dark slate) ------------------------------ */
+  --nav-bg: #101b2d;
+  --nav-bg-raised: #182540;
+  --nav-border: #223148;
+  --nav-text: #c7d2e3;
+  --nav-text-dim: #8291a9;
+  --nav-item-hover: rgba(148, 176, 220, 0.09);
+  --nav-active-bg: rgba(77, 139, 245, 0.17);
+  --nav-active-text: #ffffff;
+  --nav-accent: #4d8bf5;
+
+  /* ---- Status tones (green / amber / orange / red / grey / blue)
+         Every tone ships bg + text + border + dot so meaning is
+         carried by label + icon + colour together. ------------- */
+  --tone-green-bg: #e4f4ea;
+  --tone-green-text: #156237;
+  --tone-green-border: #bfe2cd;
+  --tone-green-dot: #1f9d55;
+
+  --tone-amber-bg: #fbf3d8;
+  --tone-amber-text: #74580a;
+  --tone-amber-border: #eedda4;
+  --tone-amber-dot: #d4a017;
+
+  --tone-orange-bg: #fdecdb;
+  --tone-orange-text: #90450e;
+  --tone-orange-border: #f4d3b4;
+  --tone-orange-dot: #e07b28;
+
+  --tone-red-bg: #fce8e8;
+  --tone-red-text: #9f2424;
+  --tone-red-border: #f1c4c4;
+  --tone-red-dot: #d64545;
+
+  --tone-grey-bg: #eef1f5;
+  --tone-grey-text: #526073;
+  --tone-grey-border: #dbe1e9;
+  --tone-grey-dot: #8896a8;
+
+  --tone-blue-bg: #e7effc;
+  --tone-blue-text: #1b4f9e;
+  --tone-blue-border: #c7daf6;
+  --tone-blue-dot: #3b7de0;
+
+  /* ---- Typography ------------------------------------------- */
+  --font-sans: 'Inter Variable', 'Inter', -apple-system, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace,
+    SFMono-Regular, Menlo, Consolas, monospace;
+
+  --fs-xs: 0.6875rem;   /* 11 — table headers, overlines */
+  --fs-sm: 0.75rem;     /* 12 — meta, captions, badges */
+  --fs-md: 0.8125rem;   /* 13 — table cells, dense body */
+  --fs-base: 0.875rem;  /* 14 — default body */
+  --fs-lg: 1rem;        /* 16 — card titles */
+  --fs-xl: 1.1875rem;   /* 19 — page titles */
+  --fs-2xl: 1.5rem;     /* 24 — entity headers */
+  --fs-3xl: 1.75rem;    /* 28 — metric values */
+
+  --lh-tight: 1.25;
+  --lh-normal: 1.5;
+
+  /* ---- Spacing (4px base) ----------------------------------- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+
+  /* ---- Borders / radius / elevation ------------------------- */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+  --radius-full: 999px;
+
+  --shadow-xs: 0 1px 2px rgba(16, 27, 45, 0.05);
+  --shadow-sm: 0 1px 3px rgba(16, 27, 45, 0.07), 0 1px 2px rgba(16, 27, 45, 0.05);
+  --shadow-md: 0 4px 14px rgba(16, 27, 45, 0.12);
+  --shadow-lg: 0 16px 40px rgba(16, 27, 45, 0.2);
+
+  /* ---- Layout ------------------------------------------------ */
+  --sidebar-w: 264px;
+  --sidebar-w-collapsed: 68px;
+  --topbar-h: 56px;
+  --content-max: 1600px;
+  --content-pad: 24px;
+
+  /* ---- Table density ----------------------------------------- */
+  --table-font: var(--fs-md);
+  --table-pad-y: 10px;
+  --table-pad-y-compact: 6px;
+  --table-pad-x: 12px;
+
+  /* ---- Controls ---------------------------------------------- */
+  --control-h: 34px;
+  --control-h-sm: 28px;
+  --control-h-lg: 40px;
+}
