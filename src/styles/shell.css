@@ -1,0 +1,480 @@
+/* ============================================================
+   AeroSync MRO — Application shell
+   Sidebar (collapsible / mobile drawer), top bar, page frame,
+   prototype disclaimer footer.
+   ============================================================ */
+
+.app-shell {
+  display: flex;
+  min-height: 100dvh;
+}
+
+/* ---- Sidebar -------------------------------------------------- */
+.app-sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  background: var(--nav-bg);
+  color: var(--nav-text);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  z-index: 40;
+  transition: width 0.18s ease;
+}
+
+.app-shell[data-sidebar='collapsed'] .app-sidebar {
+  width: var(--sidebar-w-collapsed);
+}
+
+.nav-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--nav-border);
+  min-height: var(--topbar-h);
+}
+
+.brand-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.brand-text {
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.brand-text strong {
+  display: block;
+  color: #fff;
+  font-size: var(--fs-base);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.brand-text span {
+  font-size: var(--fs-xs);
+  color: var(--nav-text-dim);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.nav-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 10px 10px 16px;
+}
+
+.nav-group + .nav-group {
+  margin-top: 18px;
+}
+
+.nav-group-label {
+  display: block;
+  padding: 0 10px 6px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--nav-text-dim);
+  white-space: nowrap;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  color: var(--nav-text);
+  font-size: var(--fs-md);
+  font-weight: 500;
+  white-space: nowrap;
+  position: relative;
+  min-height: 36px;
+}
+
+.nav-item + .nav-item {
+  margin-top: 1px;
+}
+
+.nav-item:hover {
+  background: var(--nav-item-hover);
+  text-decoration: none;
+  color: #fff;
+}
+
+.nav-item svg {
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.nav-item .nav-count {
+  margin-left: auto;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  background: rgba(148, 176, 220, 0.16);
+  color: var(--nav-text);
+  border-radius: var(--radius-full);
+  padding: 1px 7px;
+  font-variant-numeric: tabular-nums;
+}
+
+.nav-item .nav-count[data-tone='red'] {
+  background: rgba(214, 69, 69, 0.28);
+  color: #ffd3d3;
+}
+
+.nav-item[aria-current='page'] {
+  background: var(--nav-active-bg);
+  color: var(--nav-active-text);
+}
+
+.nav-item[aria-current='page']::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 7px;
+  bottom: 7px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--nav-accent);
+}
+
+.nav-item[aria-current='page'] svg {
+  opacity: 1;
+  color: var(--nav-accent);
+}
+
+/* Collapsed behaviour: hide labels, centre icons, keep tooltips */
+.app-shell[data-sidebar='collapsed'] .brand-text,
+.app-shell[data-sidebar='collapsed'] .nav-item .nav-label,
+.app-shell[data-sidebar='collapsed'] .nav-item .nav-count {
+  display: none;
+}
+
+.app-shell[data-sidebar='collapsed'] .nav-head {
+  justify-content: center;
+  padding-inline: 8px;
+}
+
+.app-shell[data-sidebar='collapsed'] .nav-item {
+  justify-content: center;
+  padding: 8px;
+}
+
+.app-shell[data-sidebar='collapsed'] .nav-group-label {
+  padding: 0;
+  margin: 0 12px 8px;
+  height: 1px;
+  overflow: hidden;
+  color: transparent;
+  background: var(--nav-border);
+}
+
+.app-shell[data-sidebar='collapsed'] .nav-group:first-child .nav-group-label {
+  display: none;
+}
+
+.nav-foot {
+  border-top: 1px solid var(--nav-border);
+  padding: 10px;
+}
+
+.nav-collapse-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  color: var(--nav-text-dim);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.nav-collapse-btn:hover {
+  background: var(--nav-item-hover);
+  color: #fff;
+}
+
+.app-shell[data-sidebar='collapsed'] .nav-collapse-btn {
+  justify-content: center;
+}
+
+.app-shell[data-sidebar='collapsed'] .nav-collapse-btn .nav-label {
+  display: none;
+}
+
+/* Scrim shown behind the mobile drawer */
+.nav-scrim {
+  display: none;
+}
+
+/* ---- Main column ---------------------------------------------- */
+.app-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- Top bar --------------------------------------------------- */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  height: var(--topbar-h);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: 0 var(--content-pad);
+}
+
+.topbar-menu-btn {
+  display: none;
+}
+
+.topbar-operator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-md);
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.topbar-operator svg {
+  color: var(--text-muted);
+}
+
+.topbar-search {
+  position: relative;
+  flex: 1;
+  max-width: 420px;
+  margin-left: var(--sp-2);
+}
+
+.topbar-search svg {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-faint);
+  pointer-events: none;
+}
+
+.topbar-search input {
+  width: 100%;
+  height: var(--control-h);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  padding: 0 64px 0 34px;
+  font-size: var(--fs-md);
+}
+
+.topbar-search input::placeholder {
+  color: var(--text-faint);
+}
+
+.topbar-search input:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 0;
+  background: var(--surface);
+}
+
+.topbar-search .kbd-hint {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.topbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.topbar-user-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px 4px 4px;
+  border-radius: var(--radius-md);
+}
+
+.topbar-user-btn:hover {
+  background: var(--surface-hover);
+}
+
+.topbar-user-meta {
+  text-align: left;
+  line-height: 1.2;
+}
+
+.topbar-user-meta strong {
+  display: block;
+  font-size: var(--fs-md);
+  font-weight: 600;
+}
+
+.topbar-user-meta span {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+
+/* ---- Content area ---------------------------------------------- */
+.app-content {
+  flex: 1;
+  padding: var(--content-pad);
+}
+
+.page {
+  width: 100%;
+  max-width: var(--content-max);
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+
+/* ---- Prototype disclaimer footer -------------------------------- */
+.prototype-footer {
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  padding: 9px var(--content-pad);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  flex-wrap: wrap;
+}
+
+.prototype-footer svg {
+  color: var(--tone-amber-dot);
+  flex-shrink: 0;
+}
+
+.prototype-footer .foot-meta {
+  margin-left: auto;
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+
+/* ================================================================
+   Responsive shell
+   ================================================================ */
+
+/* Tablet landscape / small laptop: tighter padding */
+@media (max-width: 1279px) {
+  :root {
+    --content-pad: 20px;
+  }
+}
+
+/* Below 768px the sidebar becomes an off-canvas drawer */
+@media (max-width: 767px) {
+  :root {
+    --content-pad: 14px;
+  }
+
+  .app-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: min(300px, 86vw) !important;
+    transform: translateX(-104%);
+    transition: transform 0.2s ease;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .app-shell[data-drawer='open'] .app-sidebar {
+    transform: translateX(0);
+  }
+
+  /* Drawer always shows full labels even if desktop state was collapsed */
+  .app-shell[data-sidebar='collapsed'] .brand-text,
+  .app-shell[data-sidebar='collapsed'] .nav-item .nav-label,
+  .app-shell[data-sidebar='collapsed'] .nav-item .nav-count {
+    display: revert;
+  }
+
+  .app-shell[data-sidebar='collapsed'] .nav-item {
+    justify-content: flex-start;
+    padding: 8px 10px;
+  }
+
+  .app-shell[data-sidebar='collapsed'] .nav-head {
+    justify-content: flex-start;
+    padding-inline: 16px;
+  }
+
+  .app-shell[data-sidebar='collapsed'] .nav-group-label {
+    height: auto;
+    overflow: visible;
+    color: var(--nav-text-dim);
+    background: none;
+    padding: 0 10px 6px;
+    margin: 0;
+  }
+
+  .nav-foot {
+    display: none;
+  }
+
+  .nav-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(12, 20, 33, 0.55);
+    z-index: 35;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    border: none;
+  }
+
+  .app-shell[data-drawer='open'] .nav-scrim {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .topbar-menu-btn {
+    display: inline-flex;
+  }
+
+  .topbar-operator .operator-name {
+    display: none;
+  }
+
+  .topbar-search {
+    display: none;
+  }
+
+  .topbar-user-meta {
+    display: none;
+  }
+
+  .prototype-footer .foot-meta {
+    display: none;
+  }
+}
