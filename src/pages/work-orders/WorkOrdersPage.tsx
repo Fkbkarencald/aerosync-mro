@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ClipboardCheck, Plus, Wrench } from 'lucide-react'
 import { paths } from '@/app/paths'
-import { getUser, openWorkOrders, shortName, users, workOrders } from '@/data'
+import { getUser, shortName, users, workOrders as seedWorkOrders } from '@/data'
+import { useWorkflow } from '@/workflow/useWorkflow'
 import { fmtDateTime, fmtRelative } from '@/lib/format'
 import { PageHeader } from '@/components/shell/PageHeader'
 import { DataTable, TableFooter, type Column } from '@/components/ui/DataTable'
@@ -14,20 +15,23 @@ import type { WorkOrder } from '@/data/types'
 
 const STATUS_OPTIONS = ['Open', 'Assigned', 'In Progress', 'Awaiting Parts', 'Awaiting Inspection', 'Ready for Sign-off', 'Closed', 'Cancelled']
 const PRIORITY_OPTIONS = ['Routine', 'Urgent', 'AOG']
-const AIRCRAFT_OPTIONS = [...new Set(workOrders.map((w) => w.aircraftId))].sort()
+const AIRCRAFT_OPTIONS = [...new Set(seedWorkOrders.map((w) => w.aircraftId))].sort()
 const ENGINEER_OPTIONS = [...new Set(users.filter((u) => u.role === 'Engineer' || u.role === 'Licensed Engineer').map((u) => u.name))].sort()
 
-const aogOpenCount = openWorkOrders.filter((w) => w.priority === 'AOG').length
-const awaitingPartsCount = workOrders.filter((w) => w.status === 'Awaiting Parts').length
-const readyForSignOffCount = workOrders.filter((w) => w.status === 'Ready for Sign-off').length
-const closedCount = workOrders.filter((w) => w.status === 'Closed').length
-
 export function WorkOrdersPage() {
+  const { state } = useWorkflow()
+  const { workOrders } = state
   const [q, setQ] = useState('')
   const [status, setStatus] = useState('')
   const [priority, setPriority] = useState('')
   const [aircraft, setAircraft] = useState('')
   const [engineer, setEngineer] = useState('')
+
+  const openWorkOrders = workOrders.filter((w) => w.status !== 'Closed' && w.status !== 'Cancelled')
+  const aogOpenCount = openWorkOrders.filter((w) => w.priority === 'AOG').length
+  const awaitingPartsCount = workOrders.filter((w) => w.status === 'Awaiting Parts').length
+  const readyForSignOffCount = workOrders.filter((w) => w.status === 'Ready for Sign-off').length
+  const closedCount = workOrders.filter((w) => w.status === 'Closed').length
 
   const rows = useMemo(
     () =>
@@ -45,7 +49,7 @@ export function WorkOrdersPage() {
           return true
         })
         .sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
-    [q, status, priority, aircraft, engineer],
+    [workOrders, q, status, priority, aircraft, engineer],
   )
 
   const columns: Column<WorkOrder>[] = [

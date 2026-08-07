@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { FileCheck2 } from 'lucide-react'
 import { paths } from '@/app/paths'
-import { currentUser, getAircraft, getDefect, getSignOff, getWorkOrder, userName } from '@/data'
+import { currentUser, userName } from '@/data'
+import { useWorkflow } from '@/workflow/useWorkflow'
 import { fmtDateTimeFull, fmtNumber } from '@/lib/format'
 import { Breadcrumbs } from '@/components/shell/PageHeader'
 import { StatusBadge } from '@/components/ui/Badge'
@@ -15,17 +17,37 @@ const STANDARD_STATEMENT =
 
 export function SignOffPage() {
   const { id = '' } = useParams()
-  const w = getWorkOrder(id)
+  const { state, signOff: certify } = useWorkflow()
+  const [confirmed, setConfirmed] = useState<boolean[]>([false, false, false, false, false])
+  const [feedback, setFeedback] = useState<string | null>(null)
+  const w = state.workOrders.find((item) => item.id.toUpperCase() === id.toUpperCase())
   if (!w) return <NotFoundPage />
 
-  const ac = getAircraft(w.aircraftId)
-  const defect = w.defectId ? getDefect(w.defectId) : undefined
-  const signOff = w.signOffId ? getSignOff(w.signOffId) : undefined
+  const ac = state.aircraft.find((item) => item.id === w.aircraftId)
+  const defect = w.defectId ? state.defects.find((item) => item.id === w.defectId) : undefined
+  const signOff = w.signOffId ? state.signOffs.find((item) => item.id === w.signOffId) : undefined
   const done = w.tasks.filter((t) => t.done).length
   const total = w.tasks.length
 
   const isReleased = Boolean(signOff)
   const notReady = !isReleased && w.status !== 'Ready for Sign-off'
+  const allConfirmed = confirmed.every(Boolean)
+
+  const setConfirmation = (index: number, checked: boolean) =>
+    setConfirmed((current) => current.map((value, currentIndex) => (currentIndex === index ? checked : value)))
+
+  const performSignOff = () => {
+    try {
+      const result = certify({
+        workOrderId: w.id,
+        actorId: currentUser.id,
+        statement: STANDARD_STATEMENT,
+      })
+      setFeedback(`${result.signOffId} created with maintenance record ${result.maintenanceRecordId}; ${w.aircraftId} returned to Available.`)
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : String(error))
+    }
+  }
 
   return (
     <div className="page">
@@ -38,13 +60,14 @@ export function SignOffPage() {
       />
 
       <PrototypeNotice />
+      {feedback && <Banner tone={feedback.includes('created') ? 'info' : 'danger'}>{feedback}</Banner>}
 
       <div className="signoff-doc">
         <section className="card">
           <div className="card-header">
             <h2 className="card-title">
               <FileCheck2 size={16} aria-hidden="true" />
-              Certificate of release to service — preview
+              Certificate of release to service — interactive prototype
             </h2>
             <div className="card-actions">
               <StatusBadge status={isReleased ? 'Released' : 'Awaiting Sign-off'} />
@@ -184,11 +207,22 @@ export function SignOffPage() {
             <div>
               <h3 style={{ fontSize: 'var(--fs-md)', fontWeight: 600, marginBottom: 10 }}>Confirmation checklist</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <CheckRow id="so-check-1" label="All tasks completed and recorded" defaultChecked={isReleased} />
-                <CheckRow id="so-check-2" label="Maintenance data (AMM references) followed" defaultChecked={isReleased} />
-                <CheckRow id="so-check-3" label="Duplicate/independent inspections complete where required" defaultChecked={isReleased} />
-                <CheckRow id="so-check-4" label="Tooling and materials accounted for" defaultChecked={isReleased} />
-                <CheckRow id="so-check-5" label="Aircraft log entries raised" defaultChecked={isReleased} />
+                {[
+                  'All tasks completed and recorded',
+                  'Maintenance data (AMM references) followed',
+                  'Duplicate/independent inspections complete where required',
+                  'Tooling and materials accounted for',
+                  'Aircraft log entries raised',
+                ].map((label, index) => (
+                  <CheckRow
+                    key={label}
+                    id={`so-check-${index + 1}`}
+                    label={label}
+                    checked={isReleased || confirmed[index]}
+                    disabled={isReleased}
+                    onChange={(checked) => setConfirmation(index, checked)}
+                  />
+                ))}
               </div>
             </div>
 
@@ -212,11 +246,16 @@ export function SignOffPage() {
           </div>
 
           {!isReleased ? (
-            <FormFooter note="Non-operational prototype — certification is visual only.">
+            <FormFooter note="Non-operational prototype — the demo release persists only in this browser.">
               <Link to={paths.workOrder(w.id)} className="btn btn--ghost">
                 Cancel
               </Link>
-              <button type="button" className="btn btn--primary btn--lg">
+              <button
+                type="button"
+                className="btn btn--primary btn--lg"
+                disabled={notReady || !allConfirmed}
+                onClick={performSignOff}
+              >
                 <FileCheck2 size={16} aria-hidden="true" />
                 Certify release to service
               </button>

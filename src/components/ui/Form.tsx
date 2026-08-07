@@ -2,9 +2,9 @@ import type { ReactNode } from 'react'
 import { CircleAlert, ImageUp } from 'lucide-react'
 
 /**
- * Visual-only form primitives. Inputs use defaultValue and never
- * submit — buttons either navigate to another preview route or do
- * nothing beyond local state.
+ * Shared form primitives. Most design-preview forms use uncontrolled
+ * defaults; the interactive V1 workflow opts into controlled checks
+ * where transition confirmation must be enforced.
  */
 
 export function FormCard({ children }: { children: ReactNode }) {
@@ -144,16 +144,29 @@ export function CheckRow({
   id,
   label,
   defaultChecked,
+  checked,
+  onChange,
+  disabled,
   type,
 }: {
   id: string
   label: ReactNode
   defaultChecked?: boolean
+  checked?: boolean
+  onChange?: (checked: boolean) => void
+  disabled?: boolean
   type?: 'checkbox' | 'radio'
 }) {
   return (
     <div className="check-row">
-      <input id={id} type={type ?? 'checkbox'} defaultChecked={defaultChecked} />
+      <input
+        id={id}
+        type={type ?? 'checkbox'}
+        defaultChecked={checked === undefined ? defaultChecked : undefined}
+        checked={checked}
+        disabled={disabled}
+        onChange={onChange ? (event) => onChange(event.target.checked) : undefined}
+      />
       <label htmlFor={id}>{label}</label>
     </div>
   )

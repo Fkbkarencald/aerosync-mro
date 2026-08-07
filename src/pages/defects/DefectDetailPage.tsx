@@ -1,7 +1,9 @@
-import { Link, useParams } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Paperclip, TriangleAlert, Wrench } from 'lucide-react'
 import { paths } from '@/app/paths'
-import { getAircraft, getDefect, getWorkOrder, userName } from '@/data'
+import { userName } from '@/data'
+import { useWorkflow } from '@/workflow/useWorkflow'
 import { fmtDate, fmtDateTimeFull } from '@/lib/format'
 import { Breadcrumbs } from '@/components/shell/PageHeader'
 import { EntityHeader } from '@/components/ui/EntityHeader'
@@ -15,11 +17,33 @@ import { NotFoundPage } from '@/pages/NotFoundPage'
 
 export function DefectDetailPage() {
   const { id = '' } = useParams()
-  const d = getDefect(id)
+  const navigate = useNavigate()
+  const { state, startReview, createWorkOrder, reset } = useWorkflow()
+  const [feedback, setFeedback] = useState<string | null>(null)
+  const d = state.defects.find((item) => item.id.toUpperCase() === id.toUpperCase())
   if (!d) return <NotFoundPage />
 
-  const linkedWo = d.workOrderId ? getWorkOrder(d.workOrderId) : undefined
-  const ac = getAircraft(d.aircraftId)
+  const linkedWo = d.workOrderId ? state.workOrders.find((item) => item.id === d.workOrderId) : undefined
+  const ac = state.aircraft.find((item) => item.id === d.aircraftId)
+
+  const run = (action: () => void) => {
+    try {
+      action()
+      setFeedback(null)
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : String(error))
+    }
+  }
+
+  const createInteractiveWorkOrder = () =>
+    run(() => {
+      const workOrderId = createWorkOrder({
+        defectId: d.id,
+        actorId: 'USR-003',
+        assignedToUserId: 'USR-005',
+      })
+      navigate(paths.workOrder(workOrderId))
+    })
 
   const contextualActions = (() => {
     switch (d.status) {
@@ -37,20 +61,20 @@ export function DefectDetailPage() {
       case 'Under Review':
         return (
           <>
-            <button type="button" className="btn btn--secondary">
+            <button type="button" className="btn btn--secondary" disabled title="Deferral is outside this interactive slice">
               Defer
             </button>
-            <Link to={paths.workOrderNew} className="btn btn--primary">
+            <button type="button" className="btn btn--primary" onClick={createInteractiveWorkOrder}>
               Create work order
-            </Link>
+            </button>
           </>
         )
       case 'Deferred':
         return (
           <>
-            <Link to={paths.workOrderNew} className="btn btn--primary">
+            <button type="button" className="btn btn--primary" onClick={createInteractiveWorkOrder}>
               Create work order
-            </Link>
+            </button>
             <button type="button" className="btn btn--secondary">
               Close defect
             </button>
@@ -78,6 +102,15 @@ export function DefectDetailPage() {
     <div className="page">
       <Breadcrumbs crumbs={[{ label: 'Defects', to: paths.defects }, { label: d.id }]} />
 
+      <Banner tone="info">
+        <strong>Interactive V1 workflow.</strong> Changes persist in this browser. The seeded handoff uses controller
+        Elena Voss, engineer Jack Munro, and licensed engineer Daniel Reyes.{' '}
+        <button type="button" className="btn btn--ghost btn--sm" onClick={() => { reset(); setFeedback('Interactive workflow reset to the seeded preview.') }}>
+          Reset workflow
+        </button>
+      </Banner>
+      {feedback && <Banner tone={feedback.includes('reset') ? 'info' : 'danger'}>{feedback}</Banner>}
+
       <EntityHeader
         identIcon={TriangleAlert}
         identTone={d.severity === 'Critical' ? 'red' : undefined}
@@ -98,7 +131,11 @@ export function DefectDetailPage() {
         ]}
         actions={
           <>
-            {contextualActions}
+            {d.status === 'Reported' ? (
+              <button type="button" className="btn btn--primary" onClick={() => run(() => startReview(d.id, 'USR-003'))}>
+                Start review
+              </button>
+            ) : contextualActions}
             <button type="button" className="btn btn--ghost">
               <Paperclip size={15} aria-hidden="true" />
               Add attachment
@@ -199,10 +236,10 @@ export function DefectDetailPage() {
                   icon={Wrench}
                   title="No work order yet"
                   action={
-                    (d.status === 'Reported' || d.status === 'Under Review' || d.status === 'Deferred') && (
-                      <Link to={paths.workOrderNew} className="btn btn--secondary btn--sm">
+                    (d.status === 'Under Review' || d.status === 'Deferred') && (
+                      <button type="button" className="btn btn--secondary btn--sm" onClick={createInteractiveWorkOrder}>
                         Create work order
-                      </Link>
+                      </button>
                     )
                   }
                 >

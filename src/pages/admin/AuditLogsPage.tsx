@@ -1,7 +1,8 @@
 import { Fragment, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ChevronDown, ChevronUp, Download, ScrollText } from 'lucide-react'
-import { auditLogs, getUser, shortName } from '@/data'
+import { getUser, shortName } from '@/data'
+import { useWorkflow } from '@/workflow/useWorkflow'
 import { fmtDateTime, fmtDateTimeFull, fmtRelative } from '@/lib/format'
 import { PageHeader } from '@/components/shell/PageHeader'
 import { MetricCard } from '@/components/ui/MetricCard'
@@ -26,6 +27,8 @@ const ACTION_GROUPS = [
 const OUTCOME_OPTIONS = ['Success', 'Denied']
 
 export function AuditLogsPage() {
+  const { state } = useWorkflow()
+  const { auditLogs } = state
   const [q, setQ] = useState('')
   const [userFilter, setUserFilter] = useState('')
   const [actionGroup, setActionGroup] = useState('')
@@ -35,13 +38,13 @@ export function AuditLogsPage() {
 
   const userNames = useMemo(
     () => Array.from(new Set(auditLogs.map((a) => getUser(a.userId)?.name).filter((n): n is string => Boolean(n)))).sort(),
-    [],
+    [auditLogs],
   )
-  const entityTypes = useMemo(() => Array.from(new Set(auditLogs.map((a) => a.entityType))).sort(), [])
+  const entityTypes = useMemo(() => Array.from(new Set(auditLogs.map((a) => a.entityType))).sort(), [auditLogs])
 
   const deniedCount = auditLogs.filter((a) => a.outcome === 'Denied').length
-  const actorCount = useMemo(() => new Set(auditLogs.map((a) => a.userId)).size, [])
-  const entityCount = useMemo(() => new Set(auditLogs.map((a) => a.entityRef)).size, [])
+  const actorCount = useMemo(() => new Set(auditLogs.map((a) => a.userId)).size, [auditLogs])
+  const entityCount = useMemo(() => new Set(auditLogs.map((a) => a.entityRef)).size, [auditLogs])
 
   const rows = useMemo(
     () =>
@@ -54,7 +57,7 @@ export function AuditLogsPage() {
         if (outcome && a.outcome !== outcome) return false
         return true
       }),
-    [q, userFilter, actionGroup, entityType, outcome],
+    [auditLogs, q, userFilter, actionGroup, entityType, outcome],
   )
 
   return (

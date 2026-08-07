@@ -15,6 +15,7 @@
 import { renderToString } from 'react-dom/server'
 import { MemoryRouter } from 'react-router-dom'
 import { AppRoutes } from '../src/app/AppRoutes'
+import { WorkflowProvider } from '../src/workflow/WorkflowContext'
 import { paths } from '../src/app/paths'
 import {
   accounts,
@@ -86,7 +87,9 @@ for (const route of routes) {
   try {
     html = renderToString(
       <MemoryRouter initialEntries={[route]}>
-        <AppRoutes />
+        <WorkflowProvider>
+          <AppRoutes />
+        </WorkflowProvider>
       </MemoryRouter>,
     )
     rendered++

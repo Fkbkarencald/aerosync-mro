@@ -5,6 +5,7 @@ import '@fontsource-variable/inter/index.css'
 import '@fontsource-variable/jetbrains-mono/index.css'
 import './styles/index.css'
 import { AppRoutes } from './app/AppRoutes'
+import { WorkflowProvider } from './workflow/WorkflowContext'
 
 /**
  * BrowserRouter for normal dev/preview serving; HashRouter only when
@@ -15,7 +16,9 @@ const Router = import.meta.env.VITE_ROUTER === 'hash' ? HashRouter : BrowserRout
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Router>
-      <AppRoutes />
+      <WorkflowProvider>
+        <AppRoutes />
+      </WorkflowProvider>
     </Router>
   </StrictMode>,
 )

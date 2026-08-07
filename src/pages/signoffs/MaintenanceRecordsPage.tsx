@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Archive, Download, Printer } from 'lucide-react'
 import { paths } from '@/app/paths'
-import { maintenanceRecords, shortName } from '@/data'
+import { shortName } from '@/data'
+import { useWorkflow } from '@/workflow/useWorkflow'
 import { fmtDateTime, fmtNumber } from '@/lib/format'
 import { PageHeader } from '@/components/shell/PageHeader'
 import { MetricCard } from '@/components/ui/MetricCard'
@@ -14,13 +15,15 @@ import type { MaintenanceRecord } from '@/data/types'
 const RECORD_TYPES = ['Corrective', 'Inspection', 'Scheduled']
 
 export function MaintenanceRecordsPage() {
+  const { state } = useWorkflow()
+  const { maintenanceRecords } = state
   const [q, setQ] = useState('')
   const [registration, setRegistration] = useState('')
   const [recordType, setRecordType] = useState('')
 
   const registrations = useMemo(
     () => Array.from(new Set(maintenanceRecords.map((r) => r.aircraftId))).sort(),
-    [],
+    [maintenanceRecords],
   )
 
   const aircraftCovered = registrations.length
@@ -28,7 +31,7 @@ export function MaintenanceRecordsPage() {
 
   const sorted = useMemo(
     () => [...maintenanceRecords].sort((a, b) => b.performedAt.localeCompare(a.performedAt)),
-    [],
+    [maintenanceRecords],
   )
 
   const rows = useMemo(

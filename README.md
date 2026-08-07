@@ -58,6 +58,7 @@ Open the URL shown in the terminal (typically `http://localhost:5173`).
 | `npm run build` | Production build         |
 | `npm run preview` | Preview production build |
 | `npm run lint`  | Run linter               |
+| `npm run test:workflow` | Exercise the interactive defect-to-release state machine |
 
 ## Stack
 
@@ -69,7 +70,8 @@ Open the URL shown in the terminal (typically `http://localhost:5173`).
 
 This branch contains the **complete, navigable UI design preview** of AeroSync MRO: 44 client-side
 routes covering every documented screen (docs/16), a shared enterprise design system, and one typed,
-internally consistent mock dataset — no backend, no network calls, no persistence.
+internally consistent seed dataset. The defect-to-release V1 slice is interactive and persists in the
+current browser; it does not use a backend or provide multi-user operational persistence.
 
 > **Prototype — not for operational use or airworthiness decisions.** The disclaimer is shown
 > persistently in the application footer.
@@ -82,6 +84,10 @@ Highlights:
 - **Full workflow story** — the dataset freezes an operational moment (Wed 15 Jul 2026, 13:00):
   a closed defect→work-order→sign-off loop on `VH-OYU` (DEF-2026-0042 → WO-2026-0031 → SO-2026-0018),
   a live AOG recovery at MQL, a release due by 17:30, and an A-Check in progress.
+- **Interactive V1 slice** — an authorised controller can review a reported defect and create an
+  assigned work order; the assigned engineer can start work and complete its tasks; a licensed engineer
+  can certify release. Work order, defect, aircraft availability, sign-off, maintenance-record, timeline,
+  and audit changes are committed together to browser storage.
 - **Design notes** — see [`.ai/design/active/aerosync-mro-full-ui-preview/`](./.ai/design/active/aerosync-mro-full-ui-preview/overview.md).
 
 ### Preview validation
@@ -89,6 +95,7 @@ Highlights:
 ```bash
 npm run lint                                             # oxlint
 npm run build                                            # tsc -b && vite build
+npm run test:workflow                                    # state machine + role/transition guards
 npx vite build --ssr scripts/smoke.tsx --outDir dist-smoke --emptyOutDir
 node dist-smoke/smoke.js                                 # render all routes + dead-link scan
 ```

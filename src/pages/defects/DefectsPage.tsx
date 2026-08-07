@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Inbox, Plus, TriangleAlert } from 'lucide-react'
 import { paths } from '@/app/paths'
-import { defectSeverityBreakdown, defects, openDefects, reviewQueueDefects, shortName } from '@/data'
+import { defects as seedDefects, shortName } from '@/data'
+import { useWorkflow } from '@/workflow/useWorkflow'
 import { fmtDateTime, fmtRelative } from '@/lib/format'
 import { PageHeader } from '@/components/shell/PageHeader'
 import { DataTable, TableFooter, type Column } from '@/components/ui/DataTable'
@@ -14,18 +15,27 @@ import type { Defect } from '@/data/types'
 
 const STATUS_OPTIONS = ['Reported', 'Under Review', 'Deferred', 'Work Order Created', 'Rectified', 'Closed', 'Cancelled']
 const SEVERITY_OPTIONS = ['Minor', 'Significant', 'Critical']
-const AIRCRAFT_OPTIONS = [...new Set(defects.map((d) => d.aircraftId))].sort()
+const AIRCRAFT_OPTIONS = [...new Set(seedDefects.map((d) => d.aircraftId))].sort()
 const SOURCE_OPTIONS = ['Pilot Report', 'Line Inspection', 'Scheduled Check', 'Cabin Crew']
 
-const deferredCount = defects.filter((d) => d.status === 'Deferred').length
-const closedThisMonthCount = defects.filter((d) => d.status === 'Closed' && d.closedAt?.startsWith('2026-07')).length
-
 export function DefectsPage() {
+  const { state } = useWorkflow()
+  const { defects } = state
   const [q, setQ] = useState('')
   const [status, setStatus] = useState('')
   const [severity, setSeverity] = useState('')
   const [aircraft, setAircraft] = useState('')
   const [source, setSource] = useState('')
+
+  const openDefects = defects.filter((d) => d.status !== 'Closed' && d.status !== 'Cancelled')
+  const reviewQueueDefects = defects.filter((d) => d.status === 'Reported' || d.status === 'Under Review')
+  const defectSeverityBreakdown = {
+    critical: openDefects.filter((d) => d.severity === 'Critical').length,
+    significant: openDefects.filter((d) => d.severity === 'Significant').length,
+    minor: openDefects.filter((d) => d.severity === 'Minor').length,
+  }
+  const deferredCount = defects.filter((d) => d.status === 'Deferred').length
+  const closedThisMonthCount = defects.filter((d) => d.status === 'Closed' && d.closedAt?.startsWith('2026-07')).length
 
   const rows = useMemo(
     () =>
@@ -40,7 +50,7 @@ export function DefectsPage() {
           return true
         })
         .sort((a, b) => b.reportedAt.localeCompare(a.reportedAt)),
-    [q, status, severity, aircraft, source],
+    [defects, q, status, severity, aircraft, source],
   )
 
   const columns: Column<Defect>[] = [

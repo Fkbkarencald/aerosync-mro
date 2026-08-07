@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Clock, FileCheck2, Pencil, Printer, Wrench } from 'lucide-react'
 import { paths } from '@/app/paths'
-import { getAircraft, getPart, getSignOff, getWorkOrder, requestsForWorkOrder, shortName, userName } from '@/data'
+import { getPart, requestsForWorkOrder, shortName, userName } from '@/data'
+import { useWorkflow } from '@/workflow/useWorkflow'
 import { fmtDate, fmtDateTime, fmtDateTimeFull } from '@/lib/format'
 import { Breadcrumbs } from '@/components/shell/PageHeader'
 import { EntityHeader } from '@/components/ui/EntityHeader'
@@ -15,15 +17,26 @@ import type { LabourEntry, PartRequest } from '@/data/types'
 
 export function WorkOrderDetailPage() {
   const { id = '' } = useParams()
-  const w = getWorkOrder(id)
+  const { state, beginWork, completeTask } = useWorkflow()
+  const [feedback, setFeedback] = useState<string | null>(null)
+  const w = state.workOrders.find((item) => item.id.toUpperCase() === id.toUpperCase())
   if (!w) return <NotFoundPage />
 
-  const ac = getAircraft(w.aircraftId)
-  const signOff = w.signOffId ? getSignOff(w.signOffId) : undefined
+  const ac = state.aircraft.find((item) => item.id === w.aircraftId)
+  const signOff = w.signOffId ? state.signOffs.find((item) => item.id === w.signOffId) : undefined
   const requests = requestsForWorkOrder(w.id)
   const done = w.tasks.filter((t) => t.done).length
   const total = w.tasks.length
   const totalHours = w.labour.reduce((sum, l) => sum + l.hours, 0)
+
+  const run = (action: () => void) => {
+    try {
+      action()
+      setFeedback(null)
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : String(error))
+    }
+  }
 
   const requestCols: Column<PartRequest>[] = [
     {
@@ -83,6 +96,11 @@ export function WorkOrderDetailPage() {
         ]}
         actions={
           <>
+            {w.status === 'Assigned' && w.assignedToUserId && (
+              <button type="button" className="btn btn--primary" onClick={() => run(() => beginWork(w.id, w.assignedToUserId!))}>
+                Start work
+              </button>
+            )}
             {w.status === 'Ready for Sign-off' && (
               <Link to={paths.workOrderSignOff(w.id)} className="btn btn--primary">
                 <FileCheck2 size={15} aria-hidden="true" />
@@ -107,6 +125,19 @@ export function WorkOrderDetailPage() {
         }
       />
 
+      {feedback && <Banner tone="danger">{feedback}</Banner>}
+
+      {(w.status === 'Assigned' || w.status === 'In Progress' || w.status === 'Ready for Sign-off') && (
+        <Banner tone="info">
+          <strong>Interactive handoff.</strong>{' '}
+          {w.status === 'Assigned'
+            ? 'The assigned engineer must start work before completing tasks.'
+            : w.status === 'In Progress'
+              ? 'Complete every task to move the work order and aircraft to Awaiting Sign-off.'
+              : 'All tasks are complete. A licensed engineer can now certify the release.'}
+        </Banner>
+      )}
+
       {w.priority === 'AOG' && (
         <Banner tone="danger">
           <strong>AOG recovery.</strong> {ac?.registration ?? w.aircraftId} is grounded pending completion of this
@@ -126,7 +157,14 @@ export function WorkOrderDetailPage() {
             <div className="task-list">
               {w.tasks.map((t) => (
                 <div className="task-item" key={t.seq} data-done={t.done}>
-                  <input type="checkbox" className="task-check" defaultChecked={t.done} aria-label={t.title} readOnly />
+                  <input
+                    type="checkbox"
+                    className="task-check"
+                    checked={t.done}
+                    aria-label={t.title}
+                    disabled={t.done || w.status !== 'In Progress' || !w.assignedToUserId}
+                    onChange={() => run(() => completeTask(w.id, t.seq, w.assignedToUserId!))}
+                  />
                   <div className="task-text">
                     <div className="task-title">{t.title}</div>
                     {t.note && <div className="task-note">{t.note}</div>}

@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { CalendarDays, LayoutGrid, Plane, RefreshCw, Rows3 } from 'lucide-react'
 import { paths } from '@/app/paths'
-import { aircraft, fleetSummary, getFlight, openDefectCount, openWorkOrderCount } from '@/data'
+import { getFlight } from '@/data'
+import { useWorkflow } from '@/workflow/useWorkflow'
 import { fmtTime, fmtDayMonth } from '@/lib/format'
 import { PageHeader } from '@/components/shell/PageHeader'
 import { DataTable, TableFooter, type Column } from '@/components/ui/DataTable'
@@ -23,10 +24,27 @@ const STATUS_OPTIONS = [
 ]
 
 export function FleetAvailabilityPage() {
+  const { state } = useWorkflow()
+  const { aircraft, defects, workOrders } = state
   const [q, setQ] = useState('')
   const [type, setType] = useState('')
   const [status, setStatus] = useState('')
   const [view, setView] = useState('table')
+
+  const openDefectCount = (aircraftId: string) =>
+    defects.filter((defect) => defect.aircraftId === aircraftId && defect.status !== 'Closed' && defect.status !== 'Cancelled').length
+  const openWorkOrderCount = (aircraftId: string) =>
+    workOrders.filter((workOrder) => workOrder.aircraftId === aircraftId && workOrder.status !== 'Closed' && workOrder.status !== 'Cancelled').length
+  const fleetSummary = {
+    total: aircraft.length,
+    available: aircraft.filter((item) => item.availability === 'Available').length,
+    assigned: aircraft.filter((item) => item.availability === 'Assigned').length,
+    restricted: aircraft.filter((item) => item.availability === 'Restricted').length,
+    underMaintenance: aircraft.filter((item) => item.availability === 'Under Maintenance').length,
+    awaitingParts: aircraft.filter((item) => item.availability === 'Awaiting Parts').length,
+    awaitingSignOff: aircraft.filter((item) => item.availability === 'Awaiting Sign-off').length,
+    aog: aircraft.filter((item) => item.availability === 'AOG').length,
+  }
 
   const rows = useMemo(
     () =>
@@ -37,7 +55,7 @@ export function FleetAvailabilityPage() {
         if (status && a.availability !== status) return false
         return true
       }),
-    [q, type, status],
+    [aircraft, q, type, status],
   )
 
   const columns: Column<Aircraft>[] = [
