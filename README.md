@@ -59,6 +59,7 @@ Open the URL shown in the terminal (typically `http://localhost:5173`).
 | `npm run preview` | Preview production build |
 | `npm run lint`  | Run linter               |
 | `npm run test:workflow` | Exercise the interactive defect-to-release state machine |
+| `npm run test:handoffs` | Verify role queues, scope, ordering, blocked states, and refresh |
 
 ## Stack
 
@@ -88,6 +89,9 @@ Highlights:
   assigned work order; the assigned engineer can start work and complete its tasks; a licensed engineer
   can certify release. Work order, defect, aircraft availability, sign-off, maintenance-record, timeline,
   and audit changes are committed together to browser storage.
+- **Role handoff console** — pilot, controller, engineer, and licensed-engineer previews derive their
+  queues and record scope from the same workflow state. Items link to canonical records and refresh
+  immediately after a workflow transition.
 - **Design notes** — see [`.ai/design/active/aerosync-mro-full-ui-preview/`](./.ai/design/active/aerosync-mro-full-ui-preview/overview.md).
 
 ### Preview validation
@@ -96,6 +100,7 @@ Highlights:
 npm run lint                                             # oxlint
 npm run build                                            # tsc -b && vite build
 npm run test:workflow                                    # state machine + role/transition guards
+npm run test:handoffs                                    # role projections + scope and refresh guards
 npx vite build --ssr scripts/smoke.tsx --outDir dist-smoke --emptyOutDir
 node dist-smoke/smoke.js                                 # render all routes + dead-link scan
 ```

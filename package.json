@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "test:workflow": "vite build --ssr scripts/workflow.test.ts --outDir node_modules/.cache/aerosync-workflow-test --emptyOutDir && node node_modules/.cache/aerosync-workflow-test/workflow.test.js",
+    "test:handoffs": "vite build --ssr scripts/handoffs.test.ts --outDir node_modules/.cache/aerosync-handoffs-test --emptyOutDir && node node_modules/.cache/aerosync-handoffs-test/handoffs.test.js",
     "preview": "vite preview"
   },
   "dependencies": {
